@@ -47,9 +47,10 @@ const (
 )
 
 // A Message is the baseline frame for all socket messages
+// one of the constants defined above
 type Message struct {
-	Command int      // one of the constants defined above
-	Args    []string // optional Argument
+	Command int      `json:"command"`
+	Args    []string `json:"args"`
 }
 
 // turn message to JSON
