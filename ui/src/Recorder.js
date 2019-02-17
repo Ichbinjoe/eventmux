@@ -40,9 +40,9 @@ class Recorder extends Component {
 
             function generateOffer() {
                 const pc = new RTCPeerConnection({
-                    iceServers: [
+                    iceServers: {
                         urls: ["stun:stun.eventmux.com:3478"]
-                    ]
+                    }
                 })
                 this.peers.push(pc)
 
