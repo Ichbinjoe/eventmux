@@ -16,6 +16,14 @@ class NegotiationConnection {
         this.connectWebsocket()
         this.running = true
 
+    }
+
+    connectWebsocket() {
+        if (this.conn !== undefined) {
+            this.conn.close()
+        }
+
+        this.conn = new WebSocket("ws://" + document.location.host + "/ws");
         this.conn.onclose = function (evt) {
             if (!this.running) return;
             console.log("Web socket closed; trying for a new stream...");
@@ -48,18 +56,7 @@ class NegotiationConnection {
         };
     }
 
-    connectWebsocket() {
-        if (this.conn !== undefined) {
-            this.conn.close()
-        }
-
-        this.conn = new WebSocket("ws://" + document.location.host + "/ws");
-    }
-
     writeMessage(command, arg=null) {
-        if (this.conn === undefined)
-            this.connectWebsocket()
-
         if (this.conn.readyState !== 1) {
             console.log("Websocket couldn't connect!")
             return
@@ -72,7 +69,9 @@ class NegotiationConnection {
         }
 
         var msg = {command: command, args: arg};
-        this.conn.send(JSON.stringify(msg));
+        const m = JSON.stringify(msg)
+        console.log(m)
+        this.conn.send(m)
     }
 
     requestNewStream() {

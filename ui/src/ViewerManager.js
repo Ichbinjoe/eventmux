@@ -14,9 +14,9 @@ class ViewerManager extends Component {
         console.log(this.props)
         this.props.negotiator().onNewChannelPush = function(uid, offer) {
             const pc = new RTCPeerConnection({
-                iceServers: {
+                iceServers: [{
                     urls: ["stun:stun.eventmux.com:3478"]
-                }
+                }]
             })
             pc.setRemoteDescription(offer).then(pc.createAnswer).then(answer => {
                 pc.setLocalDescription(answer).then(() => {
@@ -49,8 +49,10 @@ class ViewerManager extends Component {
             }, 3000)
         }
 
-
-        this.startGrabNew()
+        const ref = this
+        setTimeout(() => {
+            ref.startGrabNew()
+        })
     }
 
     startGrabNew() {

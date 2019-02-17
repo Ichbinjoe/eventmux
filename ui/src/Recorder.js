@@ -34,23 +34,24 @@ class Recorder extends Component {
     componentDidMount() {
     
         const waitingForAnswer = {}
+        const ref = this
 
         // Grab the streams and attach
         navigator.mediaDevices.getUserMedia({video: true, audio: true}).then(stream => {
             function generateOffer(uid) {
                 const pc = new RTCPeerConnection({
-                    iceServers: {
+                    iceServers: [{
                         urls: ["stun:stun.eventmux.com:3478"]
-                    }
+                    }]
                 })
-                this.peers.push(pc)
+                ref.peers.push(pc)
 
                 let connectedInTime = false
 
                 function deleteFromList() {
-                    const idx = this.peers.indexOf(pc)
+                    const idx = ref.peers.indexOf(pc)
                     if (idx > -1)
-                        this.peers.splice(idx, 1)
+                        ref.peers.splice(idx, 1)
 
                     delete waitingForAnswer[uid]
                 }
@@ -82,24 +83,24 @@ class Recorder extends Component {
                 pc.createOffer(offer => {
                     pc.setLocalDescription(offer, () => {
                         waitingForAnswer[uid] = pc
-                        this.props.negotiator().supplyOffer(uid, offer)
+                        ref.props.negotiator().supplyOffer(uid, offer)
                     }, onErr)
                 }, onErr)
 
 
             }
 
-            this.props.negotiator().onRequestOffer = generateOffer
-            this.props.negotiator().onSupplyAnswer = function(uid, answer) {
+            ref.props.negotiator().onRequestOffer = generateOffer
+            ref.props.negotiator().onSupplyAnswer = function(uid, answer) {
                 if (waitingForAnswer[uid]) {
                     waitingForAnswer[uid].setRemoteDescription(answer)
                     delete waitingForAnswer[uid]
                 }
             }
                 
-            this.props.negotiator().startBroadcast()
+            ref.props.negotiator().startBroadcast()
             
-            const v = this.video.current
+            const v = ref.video.current
             v.srcObject = stream
             v.onloadedmetadata = e => v.play()
 
@@ -113,7 +114,7 @@ class Recorder extends Component {
         this.props.negotiator().onUpdateViewerCount = undefined
 
         this.peers.forEach(peer => {
-            this.peer.close()
+            peer.close()
         })
         this.peers = []
         
