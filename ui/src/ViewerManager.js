@@ -18,7 +18,7 @@ class ViewerManager extends Component {
                     urls: ["stun:stun.eventmux.com:3478"]
                 }]
             })
-            pc.setRemoteDescription(JSON.parse(offer)).then(pc.createAnswer).then(answer => {
+            pc.setRemoteDescription(JSON.parse(offer)).then(pc.createAnswer.bind(pc)).then(answer => {
                 pc.setLocalDescription(answer).then(() => {
                     ref.props.negotiator().offerAnswer(uid, JSON.stringify(answer))
                 }).catch(e => console.log(e))
