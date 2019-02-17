@@ -6,6 +6,7 @@ package main
 
 import (
 	"bytes"
+	"encoding/json"
 	"log"
 	"net/http"
 	"time"
@@ -45,13 +46,19 @@ type Client struct {
 	conn *websocket.Conn
 
 	// Buffered channel of outbound messages.
-	send chan []byte
+	Send chan *Message
 
-	// If this client is a streamer, this is the content stream ID
-	streamID string
+	IsStreamer bool    // fuck this
+	Streamer   *Client // Streamer to which this viewer is subscribed
+	Viewers    map[*Client]bool
+}
 
-	// If this client is a viewer, this is a pointer to the streamer client
-	streamer *Client
+func (c *Client) unregisterViewer() {
+	if !c.IsStreamer && c.Streamer != nil {
+		// cleanup both sides
+		delete(c.Streamer.Viewers, c)
+		c.Streamer = nil
+	}
 }
 
 // readPump pumps messages from the websocket connection to the hub.
@@ -81,18 +88,23 @@ func (c *Client) readPump() {
 			break
 		}
 		log.Printf(string(byteArr))
-		byteArr = bytes.TrimSpace(bytes.Replace(byteArr, newline,
-			space, -1))
-		msg, _ := messageFromJSON(byteArr)
+		byteArr = bytes.TrimSpace(bytes.Replace(byteArr, newline, space, -1))
+		msg, _ := MessageFromJSON(byteArr)
 
-		log.Printf("Received message %d %s", msg.Command, msg.Arg)
+		//log.Printf("Received message %d %s", msg.Command, msg.Args)
 
 		switch msg.Command {
 		case nextViewingMsg:
 			c.hub.registerViewer <- c
 		case startStreamingMsg:
-			c.streamID = msg.Arg // association of stream id with client
 			c.hub.registerStreamer <- c
+		case responseNewOfferMsg:
+			// We are current in the STREAMER's pump
+			// expect id in args[0], offer in args[1]
+			pair := c.hub.SVPairs[msg.Args[0]]
+			pair.S.Viewers[pair.V] = true
+			pair.V.Streamer = pair.S
+			pair.V.Send <- NewViewingRespMsg(msg.Args[1])
 		}
 	}
 }
@@ -110,7 +122,7 @@ func (c *Client) writePump() {
 	}()
 	for {
 		select {
-		case message, ok := <-c.send:
+		case message, ok := <-c.Send:
 			c.conn.SetWriteDeadline(time.Now().Add(writeWait))
 			if !ok {
 				// The hub closed the channel.
@@ -122,14 +134,23 @@ func (c *Client) writePump() {
 			if err != nil {
 				return
 			}
-			w.Write(message)
+
+			byteArr, err := json.Marshal(message)
+			if err != nil {
+				log.Println(err)
+				return
+			}
+
+			w.Write(byteArr)
+
+			//w.Write(message)
 
 			// Add queued chat messages to the current websocket message.
-			n := len(c.send)
-			for i := 0; i < n; i++ {
-				w.Write(newline)
-				w.Write(<-c.send)
-			}
+			//n := len(c.Send)
+			//for i := 0; i < n; i++ {
+			//	w.Write(newline)
+			//	w.Write(<-c.Send)
+			//}
 
 			if err := w.Close(); err != nil {
 				return
@@ -152,10 +173,12 @@ func serveWs(hub *Hub, w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	client := &Client{
-		hub:      hub,
-		conn:     conn,
-		send:     make(chan []byte, 256),
-		streamID: "",
+		hub:        hub,
+		conn:       conn,
+		Send:       make(chan *Message, 256),
+		IsStreamer: false,
+		Viewers:    make(map[*Client]bool),
+		// leave Streamer uninitialized?
 	}
 
 	// Don't do anything until client initiates the stream
