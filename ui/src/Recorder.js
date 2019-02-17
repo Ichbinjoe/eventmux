@@ -81,7 +81,7 @@ class Recorder extends Component {
                 }
 
                 pc.onicecandidate = function(candidate) {
-                    ref.props.negotiator().sendIce(uid, JSON.stringify(candidate), false)
+                    ref.props.negotiator().sendIce(uid, JSON.stringify(candidate.candidate), false)
                 }
 
                 pc.createOffer(offer => {

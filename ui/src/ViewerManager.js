@@ -27,7 +27,7 @@ class ViewerManager extends Component {
             let connectedInTime = false
 
             pc.onicecandidate = function(candidate) {
-                ref.props.negotiator().sendIce(uid, JSON.stringify(candidate), true)
+                ref.props.negotiator().sendIce(uid, JSON.stringify(candidate.candidate), true)
             }
 
             ref.props.negotiator().onICE = function(uid, ice) {
