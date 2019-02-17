@@ -5,9 +5,7 @@ import Viewer from './Viewer';
 class ViewerManager extends Component {
     constructor(props) {
         super(props)
-        this.state = {
-            stream: undefined
-        }
+        this.viewer = React.createRef()
     }
 
     componentDidMount() {
@@ -38,9 +36,7 @@ class ViewerManager extends Component {
                 switch (pc.connectionState) {
                     case "connected":
                         connectedInTime = true
-                        ref.setState({
-                            stream: pc 
-                        })
+                        ref.viewer.current.startPlayback(pc)
                         break
                     case "disconnected":
                     case "failed":
@@ -68,7 +64,7 @@ class ViewerManager extends Component {
 
     render() {
         return (
-            <Viewer onContinue={this.startGrabNew.bind(this)} stream={this.state.stream}/>
+            <Viewer ref={this.viewer} onContinue={this.startGrabNew.bind(this)}/>
         )
     }
 }

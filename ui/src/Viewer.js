@@ -9,12 +9,13 @@ class Viewer extends Component {
     constructor(props) {
         super(props)
 
+        this.stream = null
         this.viewer = React.createRef();
     }
 
     continue(e) {
         if (typeof this.props.onContinue === "function") {
-            this.props.onContinue(e, this.props.stream && this.props.stream.connectionState)
+            this.props.onContinue(e, this.stream && this.stream.connectionState)
         }
     }
 
@@ -27,12 +28,14 @@ class Viewer extends Component {
         }
     }
 
+    startPlayback(stream) {
+        const v = this.viewer.current
+        this.stream = stream
+        v.srcObject = this.stream
+        v.onLoadedMetadata = _ => v.play()
+    }
+
     render() {
-        if (this.props.stream) {
-            const v = this.viewer.current
-            v.srcObject = this.props.stream
-            v.onLoadedMetadata = _ => v.play()
-        }
         return (
             <>
             <canvas ref={this.viewer} className='viewer-canvas'/>
