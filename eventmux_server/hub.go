@@ -57,6 +57,7 @@ func (h *Hub) run() {
 			client.unregisterViewer()
 			client.IsStreamer = true
 			h.streamers[client] = true
+			client.Viewers = make(map[*Client]bool)
 
 		case client := <-h.registerViewer:
 

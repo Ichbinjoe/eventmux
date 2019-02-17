@@ -196,7 +196,7 @@ func serveWs(hub *Hub, w http.ResponseWriter, r *http.Request) {
 		conn:       conn,
 		Send:       make(chan *Message, 256),
 		IsStreamer: false,
-		Viewers:    make(map[*Client]bool),
+		Viewers:    nil,
 		PairID:     "",
 		// leave Streamer uninitialized?
 	}
