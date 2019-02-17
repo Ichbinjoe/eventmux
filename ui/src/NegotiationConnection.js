@@ -26,7 +26,7 @@ class NegotiationConnection {
 
         const ref = this
 
-        this.conn = new WebSocket("ws://" + document.location.host + "/ws");
+        this.conn = new WebSocket("wss://" + document.location.host + "/ws");
         this.conn.onclose = function (evt) {
             if (!this.running) return;
             console.log("Web socket closed; trying for a new stream...");
