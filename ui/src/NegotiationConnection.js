@@ -71,7 +71,7 @@ class NegotiationConnection {
             arg = [arg]
         }
 
-        var msg = { command: command, args: arg };
+        var msg = {command: command, args: arg};
         this.conn.send(JSON.stringify(msg));
     }
 
