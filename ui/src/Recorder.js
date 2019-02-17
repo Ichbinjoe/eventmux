@@ -32,13 +32,16 @@ class Recorder extends Component {
     }
 
     componentDidMount() {
+    
+        const waitingForAnswer = {}
+
         // Grab the streams and attach
         navigator.mediaDevices.getUserMedia({video: true, audio: true}).then(stream => {
             this.setState({
                 allowed: true
             })
 
-            function generateOffer() {
+            function generateOffer(uid) {
                 const pc = new RTCPeerConnection({
                     iceServers: {
                         urls: ["stun:stun.eventmux.com:3478"]
@@ -52,6 +55,8 @@ class Recorder extends Component {
                     const idx = this.peers.indexOf(pc)
                     if (idx > -1)
                         this.peers.splice(idx, 1)
+
+                    delete waitingForAnswer[uid]
                 }
 
                 pc.onConnectionStateChange = function(e) {
@@ -80,12 +85,21 @@ class Recorder extends Component {
 
                 pc.createOffer(offer => {
                     pc.setLocalDescription(offer, () => {
-                        this.props.negotiator.supplyOffer(offer)
+                        waitingForAnswer[uid] = pc
+                        this.props.negotiator.supplyOffer(uid, offer)
                     }, onErr)
                 }, onErr)
+
+
             }
 
             this.props.negotiator.onRequestOffer = generateOffer
+            this.props.negotiator.onSupplyAnswer = function(uid, answer) {
+                if (waitingForAnswer[uid]) {
+                    waitingForAnswer[uid].setRemoteDescription(answer)
+                    delete waitingForAnswer[uid]
+                }
+            }
                 
             this.props.negotiator.startBroadcast()
             

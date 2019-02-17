@@ -24,6 +24,7 @@ class NegotiationConnection {
 
         this.conn.onmessage = function (evt) {
             var msg = JSON.parse(evt.data);
+            console.log(`Got message ${msg}`)
 
             switch (msg.command) {
                 case NEW_VIEWING_CHANNEL_PUSH_MSG:
@@ -37,6 +38,10 @@ class NegotiationConnection {
                 case REQUEST_OFFER_MSG:
                     if (this.onRequestOffer !== undefined)
                         this.onRequestOffer(msg.args[0])
+                    break
+                case SUPPLY_ANSWER_MSG:
+                    if (this.onSupplyAnswer !== undefined)
+                        this.onSupplyAnswer(msg.args[0])
                     break
             }
         };
@@ -78,12 +83,12 @@ class NegotiationConnection {
         this.writeMessage(START_STREAMING_MSG)
     }
 
-    supplyOffer(offer) {
-        this.writeMessage(SUPPLY_OFFER_MSG, offer)
+    supplyOffer(uid, offer) {
+        this.writeMessage(SUPPLY_OFFER_MSG, [uid, offer])
     }
 
     supplyAnswer(uid, answer) {
-        this.writeMessage(SUPPLY_ANSWER_MSG, answer)
+        this.writeMessage(SUPPLY_ANSWER_MSG, [uid, answer])
     }
 
     close() {
