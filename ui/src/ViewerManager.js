@@ -54,7 +54,7 @@ class ViewerManager extends Component {
                 if (!connectedInTime) {
                     pc.close()
                 }
-            }, 3000)
+            }, 10000)
         }
 
         setTimeout(() => {

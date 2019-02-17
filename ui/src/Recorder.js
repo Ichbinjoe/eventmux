@@ -73,7 +73,7 @@ class Recorder extends Component {
                     if (!connectedInTime) {
                         pc.close()
                     }
-                }, 3000)
+                }, 10000)
 
                 function onErr(e) {
                     console.log(e)
