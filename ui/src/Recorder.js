@@ -85,7 +85,7 @@ class Recorder extends Component {
                         waitingForAnswer[uid] = pc
                         ref.props.negotiator().supplyOffer(uid, offer)
                     }, onErr)
-                }, onErr)
+                }, onErr, {})
 
 
             }
