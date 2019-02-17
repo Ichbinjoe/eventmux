@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<title>Chat Example</title>
+<script type="text/javascript">
+window.onload = function () {
+    var conn;
+    var msg = document.getElementById("msg");
+    var log = document.getElementById("log");
+
+    function logOutput(str) {
+        item = document.getElementById("output");
+        logstuff = item.value
+        logstuff = logstuff + str + "\n"
+        item.value = logstuff
+    }
+
+    function appendLog(item) {
+        var doScroll = log.scrollTop > log.scrollHeight - log.clientHeight - 1;
+        log.appendChild(item);
+        if (doScroll) {
+            log.scrollTop = log.scrollHeight - log.clientHeight;
+        }
+    }
+
+    document.getElementById("start_viewer_button").onclick =
+        function () {
+
+            logOutput("shit");
+
+            msg = { command: 2, arg: "" };
+            conn.send(JSON.stringify(msg));
+
+    }
+    document.getElementById("start_streamer_button").onsubmit =
+        function () {
+
+    }
+
+    document.getElementById("form").onsubmit = function () {
+        if (!conn) {
+            return false;
+        }
+        if (!msg.value) {
+            return false;
+        }
+        conn.send(msg.value);
+        msg.value = "";
+        return false;
+    };
+
+    if (window["WebSocket"]) {
+        conn = new WebSocket("ws://" + document.location.host + "/ws");
+        conn.onclose = function (evt) {
+            var item = document.createElement("div");
+            item.innerHTML = "<b>Connection closed.</b>";
+            appendLog(item);
+        };
+        conn.onmessage = function (evt) {
+            logOutput("got shit")
+            var messages = evt.data.split('\n');
+            logOutput(messages)
+        };
+    } else {
+        var item = document.createElement("div");
+        item.innerHTML = "<b>Your browser does not support WebSockets.</b>";
+        appendLog(item);
+    }
+
+    logOutput("stuff and things bitch");
+};
+</script>
+<style type="text/css">
+html {
+    overflow: hidden;
+}
+
+body {
+    overflow: hidden;
+    padding: 0;
+    margin: 0;
+    width: 100%;
+    height: 100%;
+    background: gray;
+}
+
+#log {
+    background: white;
+    margin: 0;
+    padding: 0.5em 0.5em 0.5em 0.5em;
+    position: absolute;
+    top: 0.5em;
+    left: 0.5em;
+    right: 0.5em;
+    bottom: 3em;
+    overflow: auto;
+}
+
+#form {
+    padding: 0 0.5em 0 0.5em;
+    margin: 0;
+    position: absolute;
+    bottom: 1em;
+    left: 0px;
+    width: 100%;
+    overflow: hidden;
+}
+
+textarea {
+    width: -webkit-fill-available;
+    height: -webkit-fill-available;
+}
+
+</style>
+</head>
+<body>
+    <div id="log"><textarea id="output" ></textarea></div>
+<form id="form">
+    <input id="start_viewer_button" type="button" value="start viewer" />
+    <input id="start_streamer_button" type="button" value="start streamer" />
+    <input id="close_all_button" type="button" value="close all" />
+</form>
+</body>
+</html>

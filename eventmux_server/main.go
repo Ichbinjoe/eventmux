@@ -30,10 +30,11 @@ func main() {
 
 	r := mux.NewRouter()
 
-	r.HandleFunc("/", serveHome)
+	//r.HandleFunc("/", serveHome)
 	r.HandleFunc("/ws", func(w http.ResponseWriter, r *http.Request) {
 		serveWs(hub, w, r)
 	})
+	r.PathPrefix("/").Handler(http.FileServer(http.Dir("./test_ui/")))
 
 	http.ListenAndServe(":80", r)
 

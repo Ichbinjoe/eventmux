@@ -28,8 +28,8 @@ const (
 
 // A Message is the baseline frame for all socket messages
 type Message struct {
-	command int    // one of the constants defined above
-	arg     string // optional argument
+	Command int    // one of the constants defined above
+	Arg     string // optional Argument
 }
 
 func (m *Message) toJSON() []byte {
@@ -41,19 +41,19 @@ func (m *Message) toJSON() []byte {
 	return b
 }
 
-func messageFromJSON(data []byte) *Message {
+func messageFromJSON(data []byte) (*Message, error) {
 	newMsg := &Message{}
 	err := json.Unmarshal(data, newMsg)
 	if err != nil {
 		fmt.Println(err)
 	}
-	return newMsg
+	return newMsg, err
 }
 
 func newViewingRespMsg(streamID string) *Message {
-	return &Message{command: nextViewingRespMsg, arg: streamID}
+	return &Message{Command: nextViewingRespMsg, Arg: streamID}
 }
 
 func newViewerCountUpdateMsg(count int) *Message {
-	return &Message{command: updateViewerCountMsg, arg: strconv.Itoa(count)}
+	return &Message{Command: updateViewerCountMsg, Arg: strconv.Itoa(count)}
 }

@@ -5,6 +5,7 @@
 package main
 
 import (
+	"bytes"
 	"log"
 	"net/http"
 	"time"
@@ -79,14 +80,18 @@ func (c *Client) readPump() {
 			}
 			break
 		}
-		//byteArr = bytes.TrimSpace(bytes.Replace(message, newline, space, -1))
-		msg := messageFromJSON(byteArr)
+		log.Printf(string(byteArr))
+		byteArr = bytes.TrimSpace(bytes.Replace(byteArr, newline,
+			space, -1))
+		msg, _ := messageFromJSON(byteArr)
 
-		switch msg.command {
+		log.Printf("Received message %d %s", msg.Command, msg.Arg)
+
+		switch msg.Command {
 		case nextViewingMsg:
 			c.hub.registerViewer <- c
 		case startStreamingMsg:
-			c.streamID = msg.arg // association of stream id with client
+			c.streamID = msg.Arg // association of stream id with client
 			c.hub.registerStreamer <- c
 		}
 	}

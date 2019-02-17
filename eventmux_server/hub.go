@@ -54,18 +54,23 @@ func (h *Hub) run() {
 			h.streamers[client] = make(map[*Client]bool) // reset
 		case client := <-h.registerViewer:
 
+			log.Printf("sending shit")
 			// make sure this client wasn't previously streaming
 			h.unregisterStreamer <- client
+			log.Printf("sending more shit")
 
 			h.viewers[client] = true
 			client.streamID = ""
 			newStreamer := h.getStreamToView()
-			client.streamer = newStreamer
-			h.streamers[newStreamer][client] = true
+			if newStreamer != nil {
+				client.streamer = newStreamer
+				h.streamers[newStreamer][client] = true
+			}
 
 			// send back stream to start viewing
 			byteArr, err := json.Marshal(
-				newViewingRespMsg(newStreamer.streamID))
+				//newViewingRespMsg(newStreamer.streamID))
+				newViewingRespMsg("42"))
 			if err != nil {
 				log.Printf("error: %v", err)
 			} else {
