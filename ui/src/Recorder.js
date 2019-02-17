@@ -83,7 +83,7 @@ class Recorder extends Component {
                 pc.createOffer(offer => {
                     pc.setLocalDescription(offer, () => {
                         waitingForAnswer[uid] = pc
-                        ref.props.negotiator().supplyOffer(uid, offer)
+                        ref.props.negotiator().supplyOffer(uid, JSON.stringify(offer))
                     }, onErr)
                 }, onErr, {
                     offerToReceiveAudio: 1,
@@ -94,7 +94,7 @@ class Recorder extends Component {
             ref.props.negotiator().onRequestOffer = generateOffer
             ref.props.negotiator().onSupplyAnswer = function(uid, answer) {
                 if (waitingForAnswer[uid]) {
-                    waitingForAnswer[uid].setRemoteDescription(answer)
+                    waitingForAnswer[uid].setRemoteDescription(JSON.parse(answer))
                     delete waitingForAnswer[uid]
                 }
             }
