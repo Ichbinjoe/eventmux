@@ -34,8 +34,8 @@ class App extends Component {
         }
         return (
             <div className="App">
-                {this.state.recordState ? <Recorder negotiator={this.negotiator}/> 
-                        : <ViewerManager negotiator={this.negotiator}/>}
+                {this.state.recordState ? <Recorder negotiator={()=>this.negotiator}/> 
+                        : <ViewerManager negotiator={()=>this.negotiator}/>}
                 <RecordButton recordState={this.state.recordState} onRecordState={changeRecordState.bind(this)}/>
             </div>
         );

@@ -12,7 +12,7 @@ class ViewerManager extends Component {
 
     componentDidMount() {
         console.log(this.props)
-        this.props.negotiator.onNewChannelPush = function(uid, offer) {
+        this.props.negotiator().onNewChannelPush = function(uid, offer) {
             const pc = new RTCPeerConnection({
                 iceServers: {
                     urls: ["stun:stun.eventmux.com:3478"]
@@ -20,7 +20,7 @@ class ViewerManager extends Component {
             })
             pc.setRemoteDescription(offer).then(pc.createAnswer).then(answer => {
                 pc.setLocalDescription(answer).then(() => {
-                    this.props.negotiator.offerAnswer(uid, answer)
+                    this.props.negotiator().offerAnswer(uid, answer)
                 }).catch(e => console.log(e))
             }).catch(e => console.log(e))
 
@@ -54,7 +54,7 @@ class ViewerManager extends Component {
     }
 
     startGrabNew() {
-        this.props.negotiator.requestNewStream()
+        this.props.negotiator().requestNewStream()
     }
 
     render() {

@@ -24,7 +24,7 @@ class NegotiationConnection {
 
         this.conn.onmessage = function (evt) {
             var msg = JSON.parse(evt.data);
-            console.log(`Got message ${msg}`)
+            console.log(`Got message ${JSON.stringify(msg)}`)
 
             switch (msg.command) {
                 case NEW_VIEWING_CHANNEL_PUSH_MSG:

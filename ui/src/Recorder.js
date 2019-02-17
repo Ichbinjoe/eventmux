@@ -37,10 +37,6 @@ class Recorder extends Component {
 
         // Grab the streams and attach
         navigator.mediaDevices.getUserMedia({video: true, audio: true}).then(stream => {
-            this.setState({
-                allowed: true
-            })
-
             function generateOffer(uid) {
                 const pc = new RTCPeerConnection({
                     iceServers: {
@@ -86,22 +82,22 @@ class Recorder extends Component {
                 pc.createOffer(offer => {
                     pc.setLocalDescription(offer, () => {
                         waitingForAnswer[uid] = pc
-                        this.props.negotiator.supplyOffer(uid, offer)
+                        this.props.negotiator().supplyOffer(uid, offer)
                     }, onErr)
                 }, onErr)
 
 
             }
 
-            this.props.negotiator.onRequestOffer = generateOffer
-            this.props.negotiator.onSupplyAnswer = function(uid, answer) {
+            this.props.negotiator().onRequestOffer = generateOffer
+            this.props.negotiator().onSupplyAnswer = function(uid, answer) {
                 if (waitingForAnswer[uid]) {
                     waitingForAnswer[uid].setRemoteDescription(answer)
                     delete waitingForAnswer[uid]
                 }
             }
                 
-            this.props.negotiator.startBroadcast()
+            this.props.negotiator().startBroadcast()
             
             const v = this.video.current
             v.srcObject = stream
@@ -112,8 +108,9 @@ class Recorder extends Component {
 
     componentWillUnmount() {
         // Stop handling stuff
-        this.props.negotiator.onRequestOffer = undefined
-        this.props.negotiator.onUpdateViewerCount = undefined
+        this.props.negotiator().onRequestOffer = undefined
+        this.props.negotiator().onSupplyAnswer = undefined
+        this.props.negotiator().onUpdateViewerCount = undefined
 
         this.peers.forEach(peer => {
             this.peer.close()
