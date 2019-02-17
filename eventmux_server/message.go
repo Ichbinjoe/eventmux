@@ -6,7 +6,7 @@ package main
 
 import (
 	"encoding/json"
-	"fmt"
+	"log"
 	"strconv"
 )
 
@@ -57,7 +57,7 @@ type Message struct {
 func (m *Message) toJSON() []byte {
 	b, err := json.Marshal(m)
 	if err != nil {
-		fmt.Println(err)
+		log.Println(err)
 		return nil
 	}
 	return b
@@ -68,7 +68,7 @@ func MessageFromJSON(data []byte) (*Message, error) {
 	newMsg := &Message{}
 	err := json.Unmarshal(data, newMsg)
 	if err != nil {
-		fmt.Println(err)
+		log.Println(err)
 	}
 	return newMsg, err
 }
@@ -98,6 +98,7 @@ func NewReqOfferMsg(id string) *Message {
 	}
 }
 
+// NewAnswerReqPassThruMsg prepares message to send back answer
 func NewAnswerReqPassThruMsg(id, answer string) *Message {
 	return &Message{
 		Command: answerReqPassthrough,

@@ -92,7 +92,11 @@ func (c *Client) readPump() {
 		}
 		log.Printf(string(byteArr))
 		byteArr = bytes.TrimSpace(bytes.Replace(byteArr, newline, space, -1))
-		msg, _ := MessageFromJSON(byteArr)
+		msg, err := MessageFromJSON(byteArr)
+		if err != nil {
+			log.Println(err)
+			continue
+		}
 
 		//log.Printf("Received message %d %s", msg.Command, msg.Args)
 
