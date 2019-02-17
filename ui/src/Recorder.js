@@ -104,7 +104,7 @@ class Recorder extends Component {
             }
             ref.props.negotiator().onICE = function(uid, ice) {
                 if (waitingForAnswer[uid]) {
-                    pc.addIceCandidate(JSON.parse(ice))
+                    waitingForAnswer[uid].addIceCandidate(JSON.parse(ice))
                 }
             }
                 
