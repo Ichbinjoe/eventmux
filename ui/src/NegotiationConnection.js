@@ -1,61 +1,94 @@
 import adapter from 'webrtc-adapter';
 
-class NegotiationConnection {
+const NEXT_VIEWING_MSG = 2
+const NEW_VIEWING_CHANNEL_PUSH_MSG = 3
+const START_STREAMING_MSG = 4;
+const UPDATE_VIEWER_COUNT_MSG = 5;
+const REQUEST_OFFER_MSG = 6;
+const SUPPLY_OFFER_MSG = 7;
+const SUPPLY_ANSWER_MSG = 8;
 
-    constructor(stun=null) {
-        this.conn = new WebSocket("ws://" + document.location.host +
-            "/ws");
+class NegotiationConnection {
+    constructor() {
+    }
+    
+    setup() {
+        this.connectWebsocket()
+        this.running = true
 
         this.conn.onclose = function (evt) {
+            if (!this.running) return;
             console.log("Web socket closed; trying for a new stream...");
-            // TODO is this supposed to be called by someone else?
-            //grabNewStream();
+            this.connectWebsocket()
         }
 
         this.conn.onmessage = function (evt) {
             var msg = JSON.parse(evt.data);
 
-            switch(msg.command=) {
-
-                    this.updateViewerCountMsg) ?
-
+            switch (msg.command) {
+                case NEW_VIEWING_CHANNEL_PUSH_MSG:
+                    if (this.onNewChannelPush !== undefined)
+                        this.onNewChannelPush(msg.args[0], msg.args[1])
+                    break
+                case UPDATE_VIEWER_COUNT_MSG:
+                    if (this.onUpdateViewerCount !== undefined)
+                        this.onUpdateViewerCount(msg.args[0])
+                    break
+                case REQUEST_OFFER_MSG:
+                    if (this.onRequestOffer !== undefined)
+                        this.onRequestOffer(msg.args[0])
+                    break
+            }
         };
-
-        this.stream_identifier = "";
-
-        // constants
-        this.nextViewingMsg = 2;
-        this.nextViewingRespMsg = 3;
-        this.startStreamingMsg = 4;
-        this.updateViewerCountMsg = 5;
-
     }
 
-    writeMessage(command, arg) {
-        var msg = { command: command, arg: arg };
+    connectWebsocket() {
+        if (this.conn !== undefined) {
+            this.conn.close()
+        }
+
+        this.conn = new WebSocket("ws://" + document.location.host + "/ws");
+    }
+
+    writeMessage(command, arg=null) {
+        if (this.conn === undefined)
+            this.connectWebsocket()
+
+        if (this.conn.readyState !== 1) {
+            console.log("Websocket couldn't connect!")
+            return
+        }
+
+        if (arg == null) {
+            arg = []
+        } else if (typeof arg !== Array) {
+            arg = [arg]
+        }
+
+        var msg = { command: command, args: arg };
         this.conn.send(JSON.stringify(msg));
     }
 
-    // Promise<RPCPeerConnection>
-    async grabNewStream() {
-
+    requestNewStream() {
         // Register ourselves as a viewer and get a new stream
-
-
+        this.writeMessage(NEXT_VIEWING_MSG)
+    }
+    
+    startBroadcast() {
+        this.writeMessage(START_STREAMING_MSG)
     }
 
-    // Promise<Void>
-    async startBroadcast() {
-
-        // First get stream identifier from STUN server
-
-        // Register ourselves as a streamer
-
+    supplyOffer(offer) {
+        this.writeMessage(SUPPLY_OFFER_MSG, offer)
     }
 
-    // Promise<Void>
-    async stopBroadcast() {
+    supplyAnswer(uid, answer) {
+        this.writeMessage(SUPPLY_ANSWER_MSG, answer)
+    }
 
+    close() {
+        this.running = false
+        this.conn.close()
     }
 }
 

@@ -11,10 +11,19 @@ class App extends Component {
     constructor(props) {
         super(props)
 
-        this.negotiator = new NegotiationConnection()
         this.state = {
             recordState: false
         }
+        this.negotiator = new NegotiationConnection()
+    }
+
+    componentDidMount() {
+        this.negotiator.setup()
+    }
+
+    componentWillUnmount() {
+        this.negotiator.close()
+        this.negotiator = undefined
     }
 
     render() {

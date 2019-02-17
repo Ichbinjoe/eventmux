@@ -11,19 +11,50 @@ class ViewerManager extends Component {
     }
 
     componentDidMount() {
+        console.log(this.props)
+        this.props.negotiator.onNewChannelPush = function(uid, offer) {
+            const pc = new RTCPeerConnection({
+                iceServers: [
+                    urls: ["stun:stun.eventmux.com:3478"]
+                ]
+            })
+            pc.setRemoteDescription(offer).then(pc.createAnswer).then(answer => {
+                pc.setLocalDescription(answer).then(() => {
+                    this.props.negotiator.offerAnswer(uid, answer)
+                }).catch(e => console.log(e))
+            }).catch(e => console.log(e))
+
+            let connectedInTime = false
+
+            pc.onConnectionStateChange = function(e) {
+                switch (pc.connectionState) {
+                    case "connected":
+                        connectedInTime = true
+                        this.setState({
+                            stream: pc 
+                        })
+                        break
+                    case "disconnected":
+                    case "failed":
+                        pc.close()
+                    case "closed":
+                        this.startGrabNew()
+                }
+            }
+            
+            setTimeout(() => {
+                if (!connectedInTime) {
+                    pc.close()
+                }
+            }, 3000)
+        }
+
+
         this.startGrabNew()
     }
 
     startGrabNew() {
-        this.props.negotiator.grabNewStream()
-            .then(stream => {
-                this.setState({
-                    stream: stream
-                })
-            }).catch(e => {
-                console.log(`Error occurred while trying to grab a stream: ${e}`)
-                this.startGrabNew()
-            })
+        this.props.negotiator.requestNewStream()
     }
 
     render() {

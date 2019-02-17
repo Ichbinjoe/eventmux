@@ -15,6 +15,8 @@ class Recorder extends Component {
         }
 
         this.video = React.createRef()
+
+        this.peers = []
     }
 
     handleUMError(err) {
@@ -31,28 +33,79 @@ class Recorder extends Component {
 
     componentDidMount() {
         // Grab the streams and attach
-    
         navigator.mediaDevices.getUserMedia({video: true, audio: true}).then(stream => {
             this.setState({
                 allowed: true
             })
+
+            function generateOffer() {
+                const pc = new RTCPeerConnection()
+                this.peers.push(pc)
+
+                let connectedInTime = false
+
+                function deleteFromList() {
+                    const idx = this.peers.indexOf(pc)
+                    if (idx > -1)
+                        this.peers.splice(idx, 1)
+                }
+
+                pc.onConnectionStateChange = function(e) {
+                    switch (pc.connectionState) {
+                        case "connected":
+                            connectedInTime = true
+                            break
+                        case "disconnected":
+                        case "failed":
+                            pc.close()
+                        case "closed":
+                            deleteFromList()
+                    }
+                }
+
+                setTimeout(() => {
+                    if (!connectedInTime) {
+                        pc.close()
+                    }
+                }, 3000)
+
+                function onErr(e) {
+                    console.log(e)
+                    generateOffer()
+                }
+
+                pc.createOffer(offer => {
+                    pc.setLocalDescription(offer, () => {
+                        this.props.negotiator.supplyOffer(offer)
+                    }, onErr)
+                }, onErr)
+            }
+
+            this.props.negotiator.onRequestOffer = generateOffer
+                
+            this.props.negotiator.startBroadcast()
             
-            this.props.negotiator.startBroadcast().catch(this.handleUMError.bind(this))
-                .then(() => {
-                    const v = this.video.current
-                    v.srcObject = stream
-                    v.onloadedmetadata = e => v.play()
-                })
+            const v = this.video.current
+            v.srcObject = stream
+            v.onloadedmetadata = e => v.play()
+
         }).catch(this.handleUMError.bind(this))
     }
 
     componentWillUnmount() {
+        // Stop handling stuff
+        this.props.negotiator.onRequestOffer = undefined
+        this.props.negotiator.onUpdateViewerCount = undefined
+
+        this.peers.forEach(peer => {
+            this.peer.close()
+        })
+        this.peers = []
+        
         const v = this.video.current
         if (v && v.srcObject) {
             v.srcObject.getTracks().forEach(t => t.stop())
         }
-
-        this.props.negotiator.stopBroadcast().catch(console.log)
     }
 
     render() {

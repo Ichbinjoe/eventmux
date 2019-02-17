@@ -6,7 +6,6 @@ import NextSVG from './next.svg';
 import BasicButton from './BasicButton'
 
 class Viewer extends Component {
-    
     constructor(props) {
         super(props)
 
@@ -24,16 +23,6 @@ class Viewer extends Component {
             const v = this.viewer.current
             v.srcObject = this.props.stream
             v.onLoadedMetadata = e => v.play()
-
-            this.props.stream.onConnectionStateChange = e => {
-                switch (this.props.stream.connectionState) {
-                    case "connected":
-                        break
-                    default:
-                        this.continue(e)
-                        break
-                }
-            }
         }
     } 
 
