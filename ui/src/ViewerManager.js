@@ -32,7 +32,7 @@ class ViewerManager extends Component {
                 pc.addIceCandidate(JSON.parse(ice))
             }
 
-            pc.onConnectionStateChange = function(e) {
+            pc.onconnectionstatechange = function(e) {
                 switch (pc.connectionState) {
                     case "connected":
                         connectedInTime = true
