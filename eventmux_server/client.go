@@ -107,7 +107,14 @@ func (c *Client) readPump() {
 			pair := c.hub.SVPairs[msg.Args[0]]
 			pair.S.Viewers[pair.V] = true
 			pair.V.Streamer = pair.S
-			pair.V.Send <- NewViewingRespMsg(msg.Args[1])
+			pair.V.Send <- NewViewingRespMsg(msg.Args[0], msg.Args[1])
+		case answerReq:
+			// expect id in args[0], answer in args[1]
+			log.Println("answer from viewer %s. \n answer: %s", msg.Args[0],
+				msg.Args[1])
+			pair := c.hub.SVPairs[msg.Args[0]]
+			pair.S.Send <- NewAnswerReqPassThruMsg(msg.Args[0], msg.Args[1])
+
 		}
 	}
 }

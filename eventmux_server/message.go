@@ -26,11 +26,14 @@ const (
 	// Request new offer for a new viewer
 	requestNewOfferMsg = 6
 
+	answerReq = 8
+
 	//
 	// Messages from server
 	//
 
-	// Response to nextViewingImage, contains id of stream to open
+	// Response to nextViewingImage,
+	// Has UUID
 	nextViewingRespMsg = 3
 
 	// Update a streamers' viewer count clientside
@@ -39,6 +42,8 @@ const (
 	// Response containing a new offer from a streamer
 	// expect id in args[0], offer in args[1]
 	responseNewOfferMsg = 7
+
+	answerReqPassthrough = 9
 )
 
 // A Message is the baseline frame for all socket messages
@@ -68,10 +73,10 @@ func MessageFromJSON(data []byte) (*Message, error) {
 }
 
 // NewViewingRespMsg create a message for responding to request for new stream
-func NewViewingRespMsg(streamID string) *Message {
+func NewViewingRespMsg(id, offer string) *Message {
 	return &Message{
 		Command: nextViewingRespMsg,
-		Args:    []string{streamID},
+		Args:    []string{id, offer},
 	}
 }
 
@@ -89,5 +94,12 @@ func NewReqOfferMsg(id string) *Message {
 	return &Message{
 		Command: requestNewOfferMsg,
 		Args:    []string{id},
+	}
+}
+
+func NewAnswerReqPassThruMsg(id, answer string) *Message {
+	return &Message{
+		Command: answerReqPassthrough,
+		Args:    []string{id, answer},
 	}
 }
