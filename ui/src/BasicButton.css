@@ -1,0 +1,10 @@
+.basicbutton {
+    position: absolute;
+    right: 0px;
+    margin-right: 0.5in;
+    bottom: 0.5in;
+}
+
+.basicbutton:hover {
+    cursor: pointer;
+}

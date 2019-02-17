@@ -1,0 +1,13 @@
+.recordbutton {
+    width: 1in;
+    height: 1in;
+    position: absolute;
+    bottom: 0.5in;
+    left: 50%;
+    margin-left: -0.5in;
+    opacity: 0.75;
+}
+
+.recordbutton:hover {
+    cursor: pointer;
+}

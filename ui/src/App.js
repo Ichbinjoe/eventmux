@@ -1,28 +1,36 @@
 import React, { Component } from 'react';
-import logo from './logo.svg';
 import './App.css';
 
+import RecordButton from './RecordButton'
+import Recorder from './Recorder'
+import ViewerManager from './ViewerManager'
+
+import NegotiationConnection from './NegotiationConnection'
+
 class App extends Component {
-  render() {
-    return (
-      <div className="App">
-        <header className="App-header">
-          <img src={logo} className="App-logo" alt="logo" />
-          <p>
-            Edit <code>src/App.js</code> and save to reload.
-          </p>
-          <a
-            className="App-link"
-            href="https://reactjs.org"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Learn React
-          </a>
-        </header>
-      </div>
-    );
-  }
+    constructor(props) {
+        super(props)
+
+        this.negotiator = new NegotiationConnection()
+        this.state = {
+            recordState: false
+        }
+    }
+
+    render() {
+        function changeRecordState(newState) {
+            this.setState({
+                recordState: newState
+            })
+        }
+        return (
+            <div className="App">
+                {this.state.recordState ? <Recorder negotiator={this.negotiator}/> 
+                        : <ViewerManager negotiator={this.negotiator}/>}
+                <RecordButton recordState={this.state.recordState} onRecordState={changeRecordState.bind(this)}/>
+            </div>
+        );
+    }
 }
 
 export default App;
