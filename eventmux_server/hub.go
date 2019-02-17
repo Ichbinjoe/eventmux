@@ -43,6 +43,7 @@ func newHub() *Hub {
 		registerStreamer:  make(chan *Client),
 		unregister:        make(chan *Client),
 		updateViewerCount: make(chan *Client),
+		SVPairs:           make(map[string]StreamerViewerPair),
 
 		streamers: make(map[*Client]bool),
 	}
