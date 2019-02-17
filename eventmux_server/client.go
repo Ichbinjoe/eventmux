@@ -45,6 +45,9 @@ type Client struct {
 	// The websocket connection.
 	conn *websocket.Conn
 
+	// used for cleaning up when streamer is done
+	PairID string
+
 	// Buffered channel of outbound messages.
 	Send chan *Message
 
@@ -190,6 +193,7 @@ func serveWs(hub *Hub, w http.ResponseWriter, r *http.Request) {
 		Send:       make(chan *Message, 256),
 		IsStreamer: false,
 		Viewers:    make(map[*Client]bool),
+		PairID:     "",
 		// leave Streamer uninitialized?
 	}
 

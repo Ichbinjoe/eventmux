@@ -105,6 +105,7 @@ func (h *Hub) initiateNewSVPair(s *Client, v *Client) {
 
 	svPair := StreamerViewerPair{S: s, V: v}
 	id := uuid.New().String()
+	s.PairID = id
 	h.SVPairs[id] = svPair
 
 	log.Println("Initiating new S/V Pair with id %s", id)
@@ -124,7 +125,12 @@ func (h *Hub) unregisterStreamer(c *Client) {
 		}
 	}
 
+	if _, ok := h.SVPairs[c.PairID]; ok {
+		delete(h.SVPairs, c.PairID)
+	}
+
 	c.IsStreamer = false
 	c.Viewers = nil
+	c.PairID = ""
 
 }
