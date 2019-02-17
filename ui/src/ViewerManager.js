@@ -20,7 +20,7 @@ class ViewerManager extends Component {
             })
             pc.setRemoteDescription(JSON.parse(offer)).then(pc.createAnswer.bind(pc)).then(answer => {
                 pc.setLocalDescription(answer).then(() => {
-                    ref.props.negotiator().offerAnswer(uid, JSON.stringify(answer))
+                    ref.props.negotiator().supplyAnswer(uid, JSON.stringify(answer))
                 }).catch(e => console.log(e))
             }).catch(e => console.log(e))
 
