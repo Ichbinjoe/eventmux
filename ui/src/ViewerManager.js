@@ -15,7 +15,7 @@ class ViewerManager extends Component {
         ref.props.negotiator().onNewChannelPush = function(uid, offer) {
             const pc = new RTCPeerConnection({
                 iceServers: [{
-                    urls: ["stun:stun.eventmux.com:3478"]
+                    urls: ["stun:stun.u-blox.com:3478"]
                 }]
             })
             pc.setRemoteDescription(JSON.parse(offer)).then(pc.createAnswer.bind(pc)).then(answer => {
