@@ -69,11 +69,11 @@ class Recorder extends Component {
                     }
                 }
 
-                setTimeout(() => {
+                    /*                setTimeout(() => {
                     if (!connectedInTime) {
                         pc.close()
                     }
-                }, 10000)
+                }, 10000)*/
 
                 function onErr(e) {
                     console.log(e)

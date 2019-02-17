@@ -49,12 +49,12 @@ class ViewerManager extends Component {
                         ref.startGrabNew()
                 }
             }
-            
+                /*            
             setTimeout(() => {
                 if (!connectedInTime) {
                     pc.close()
                 }
-            }, 10000)
+            }, 10000)*/
         }
 
         setTimeout(() => {
