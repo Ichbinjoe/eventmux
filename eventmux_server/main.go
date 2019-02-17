@@ -24,8 +24,8 @@ func main() {
 	r.PathPrefix("/").Handler(http.FileServer(http.Dir("../ui/build")))
 
 	http.ListenAndServeTLS(":443",
-		"/etc/letsencrypt/live/eventhub.ibj.com/cert.pem",
-		"/etc/letsencrypt/live/eventhub.ibj.com/privkey.pem", r)
+		"/etc/letsencrypt/live/eventhub.ibj.io/cert.pem",
+		"/etc/letsencrypt/live/eventhub.ibj.io/privkey.pem", r)
 
 	log.Fatal()
 }
