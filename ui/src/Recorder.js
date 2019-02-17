@@ -80,6 +80,10 @@ class Recorder extends Component {
                     generateOffer(uid)
                 }
 
+                pc.onicecandidate = function(candidate) {
+                    ref.props.negotiator().sendIce(uid, JSON.stringify(candidate), false)
+                }
+
                 pc.createOffer(offer => {
                     pc.setLocalDescription(offer, () => {
                         waitingForAnswer[uid] = pc
@@ -96,6 +100,11 @@ class Recorder extends Component {
                 if (waitingForAnswer[uid]) {
                     waitingForAnswer[uid].setRemoteDescription(JSON.parse(answer))
                     delete waitingForAnswer[uid]
+                }
+            }
+            ref.props.negotiator().onICE = function(uid, ice) {
+                if (waitingForAnswer[uid]) {
+                    pc.addIceCandidate(JSON.parse(ice))
                 }
             }
                 

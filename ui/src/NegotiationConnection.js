@@ -55,6 +55,11 @@ class NegotiationConnection {
                     if (ref.onSupplyAnswer !== undefined)
                         ref.onSupplyAnswer(msg.args[0], msg.args[1])
                     break
+                case 12:
+                case 13:
+                    if (ref.onICE !== undefined)
+                        ref.onICE(msg.args[0], msg.args[1])
+                    break
             }
         };
     }
@@ -90,6 +95,10 @@ class NegotiationConnection {
 
     supplyAnswer(uid, answer) {
         this.writeMessage(SUPPLY_ANSWER_MSG, [uid, answer])
+    }
+
+    sendIce(uid, msg, isViewer) {
+        this.writeMessage(isViewer ? 10 : 11, [uid, msg])
     }
 
     close() {
