@@ -28,6 +28,9 @@ const (
 
 	answerReq = 8
 
+	iceReqFromViewerMsg   = 10
+	iceReqFromStreamerMsg = 11
+
 	//
 	// Messages from server
 	//
@@ -44,6 +47,8 @@ const (
 	responseNewOfferMsg = 7
 
 	answerReqPassthrough = 9
+	iceRespToViewerMsg   = 12
+	iceRespToStreamerMsg = 13
 )
 
 // A Message is the baseline frame for all socket messages
@@ -103,5 +108,13 @@ func NewAnswerReqPassThruMsg(id, answer string) *Message {
 	return &Message{
 		Command: answerReqPassthrough,
 		Args:    []string{id, answer},
+	}
+}
+
+// NewIceMsg is generic two str arg msg pass along
+func NewIceMsg(command int, id, otherthing string) *Message {
+	return &Message{
+		Command: command,
+		Args:    []string{id, otherthing},
 	}
 }

@@ -25,7 +25,7 @@ const (
 	pingPeriod = (pongWait * 9) / 10
 
 	// Maximum message size allowed from peer.
-	maxMessageSize = 512
+	maxMessageSize = 10000
 )
 
 var (
@@ -110,7 +110,7 @@ func (c *Client) readPump() {
 		case responseNewOfferMsg:
 			// We are current in the STREAMER's pump
 			// expect id in args[0], offer in args[1]
-			log.Println("Got back offer for %s. \n Offer: %s", msg.Args[0],
+			log.Printf("Got back offer for %s. \n Offer: %s", msg.Args[0],
 				msg.Args[1])
 			pair := c.hub.SVPairs[msg.Args[0]]
 			pair.S.Viewers[pair.V] = true
@@ -118,11 +118,20 @@ func (c *Client) readPump() {
 			pair.V.Send <- NewViewingRespMsg(msg.Args[0], msg.Args[1])
 		case answerReq:
 			// expect id in args[0], answer in args[1]
-			log.Println("answer from viewer %s. \n answer: %s", msg.Args[0],
+			log.Printf("answer from viewer %s. \n answer: %s", msg.Args[0],
 				msg.Args[1])
 			pair := c.hub.SVPairs[msg.Args[0]]
 			pair.S.Send <- NewAnswerReqPassThruMsg(msg.Args[0], msg.Args[1])
-
+		case iceReqFromViewerMsg:
+			log.Printf("ICE req from viewer, passing it along")
+			pair := c.hub.SVPairs[msg.Args[0]]
+			pair.S.Send <- NewIceMsg(iceRespToStreamerMsg, msg.Args[0],
+				msg.Args[1])
+		case iceReqFromStreamerMsg:
+			log.Printf("ICE req from streamer, passing it along")
+			pair := c.hub.SVPairs[msg.Args[0]]
+			pair.V.Send <- NewIceMsg(iceRespToViewerMsg, msg.Args[0],
+				msg.Args[1])
 		default:
 			log.Println("DDFEAF")
 		}
@@ -150,7 +159,7 @@ func (c *Client) writePump() {
 				return
 			}
 
-			log.Println("message type %d sent to client", message.Command)
+			log.Printf("message type %d sent to client", message.Command)
 
 			w, err := c.conn.NextWriter(websocket.TextMessage)
 			if err != nil {
