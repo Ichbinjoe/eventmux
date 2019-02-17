@@ -18,14 +18,6 @@ class Viewer extends Component {
         }
     }
 
-    componentDidMount() {
-        if (this.props.stream) {
-            const v = this.viewer.current
-            v.srcObject = this.props.stream
-            v.onLoadedMetadata = e => v.play()
-        }
-    } 
-
     componentWillUnmount() {
         const v = this.viewer.current
         if (v.srcObject) {
@@ -36,6 +28,9 @@ class Viewer extends Component {
     }
 
     render() {
+        const v = this.viewer.current
+        v.srcObject = this.props.stream
+        v.onLoadedMetadata = e => v.play()
         return (
             <>
             <canvas ref={this.viewer} className='viewer-canvas'/>
