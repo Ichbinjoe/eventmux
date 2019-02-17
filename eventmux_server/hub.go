@@ -5,24 +5,31 @@
 package main
 
 import (
-	"encoding/json"
+	"errors"
 	"log"
+
+	"github.com/google/uuid"
 )
+
+// StreamerViewerPair used for tracking session pairs between requests
+type StreamerViewerPair struct {
+	S *Client
+	V *Client
+}
 
 // Hub maintains the set of active clients and broadcasts messages to the
 // clients.
 type Hub struct {
-	// Registered viewers.
-	viewers map[*Client]bool
 
 	// Registered streamers. Client of streamer -> []viewers
-	streamers map[*Client]map[*Client]bool // Joe is going to hate this
+	streamers map[*Client]bool
+	SVPairs   map[string]StreamerViewerPair
 
 	// Register requests from the clients.
-	registerViewer     chan *Client
-	registerStreamer   chan *Client
-	unregisterViewer   chan *Client
-	unregisterStreamer chan *Client
+	registerViewer   chan *Client
+	registerStreamer chan *Client
+	//unregisterViewer   chan *Client
+	//unregisterStreamer chan *Client
 
 	updateViewerCount chan *Client
 
@@ -32,15 +39,12 @@ type Hub struct {
 
 func newHub() *Hub {
 	return &Hub{
-		registerViewer:     make(chan *Client),
-		registerStreamer:   make(chan *Client),
-		unregisterViewer:   make(chan *Client),
-		unregisterStreamer: make(chan *Client),
-		unregister:         make(chan *Client),
-		updateViewerCount:  make(chan *Client),
+		registerViewer:    make(chan *Client),
+		registerStreamer:  make(chan *Client),
+		unregister:        make(chan *Client),
+		updateViewerCount: make(chan *Client),
 
-		viewers:   make(map[*Client]bool),
-		streamers: make(map[*Client]map[*Client]bool),
+		streamers: make(map[*Client]bool),
 	}
 }
 
@@ -49,82 +53,76 @@ func (h *Hub) run() {
 		select {
 		case client := <-h.registerStreamer:
 			// make sure this client wasn't previously viewing
-			h.unregisterViewer <- client
-			// The garbage collector will take care of this, right?
-			h.streamers[client] = make(map[*Client]bool) // reset
+			client.unregisterViewer()
+			client.IsStreamer = true
+			h.streamers[client] = true
+
 		case client := <-h.registerViewer:
 
-			log.Printf("sending shit")
 			// make sure this client wasn't previously streaming
-			h.unregisterStreamer <- client
-			log.Printf("sending more shit")
+			h.unregisterStreamer(client)
 
-			h.viewers[client] = true
-			client.streamID = ""
-			newStreamer := h.getStreamToView()
-			if newStreamer != nil {
-				client.streamer = newStreamer
-				h.streamers[newStreamer][client] = true
+			if s, err := h.getStreamToView(); err == nil {
+				h.initiateNewSVPair(s, client)
 			}
 
-			// send back stream to start viewing
-			byteArr, err := json.Marshal(
-				//newViewingRespMsg(newStreamer.streamID))
-				newViewingRespMsg("42"))
-			if err != nil {
-				log.Printf("error: %v", err)
-			} else {
-				client.send <- byteArr
-			}
-
-		case client := <-h.unregisterViewer:
-			if _, ok := h.viewers[client]; ok {
-				// cleanup
-				delete(h.streamers[client.streamer], client)
-				delete(h.viewers, client)
-				close(client.send)
-			}
-
-		case client := <-h.unregisterStreamer:
-			if _, ok := h.streamers[client]; ok {
-
-				oldViewers := h.streamers[client]
-
-				// go ahead and send the viewers a new streamer to watch
-				for c := range oldViewers {
-					h.registerViewer <- c
-				}
-
-				// cleanup the streamer
-				delete(h.streamers, client)
-				close(client.send)
-
-			}
 		case client := <-h.unregister:
 			// Just pass to both because we want this client gone
-			h.unregisterStreamer <- client
-			h.unregisterViewer <- client
+			h.unregisterStreamer(client)
+			client.unregisterViewer()
 
-		case client := <-h.updateViewerCount:
-			byteArr, err := json.Marshal(
-				newViewerCountUpdateMsg(len(h.streamers[client])))
+			if _, ok := h.streamers[client]; ok {
+				delete(h.streamers, client)
+			}
+			close(client.Send)
+
+			/*case client := <-h.updateViewerCount:
+			/*byteArr, err := json.Marshal(
+				NewViewerCountUpdateMsg(len(h.streamers[client])))
 			if err != nil {
 				log.Printf("error: %v", err)
 			} else {
-				client.send <- byteArr
-			}
+				client.Send <- byteArr
+			}*/
 		}
 	}
 }
 
 // TODO Make this not just the first streamer
-func (h *Hub) getStreamToView() *Client {
+func (h *Hub) getStreamToView() (*Client, error) {
 
 	if len(h.streamers) > 0 {
 		for c := range h.streamers {
-			return c
+			return c, nil
 		}
 	}
 
-	return nil
+	return nil, errors.New("No streamers available")
+}
+
+func (h *Hub) initiateNewSVPair(s *Client, v *Client) {
+
+	svPair := StreamerViewerPair{S: s, V: v}
+	id := uuid.New().String()
+	h.SVPairs[id] = svPair
+
+	s.Send <- NewReqOfferMsg(id)
+}
+
+func (h *Hub) unregisterStreamer(c *Client) {
+	if _, ok := h.streamers[c]; ok {
+
+		// Take care of viewers of the now defunct streamer
+		for v := range c.Viewers {
+			if s, err := h.getStreamToView(); err == nil {
+				h.initiateNewSVPair(s, v)
+			} else {
+				log.Println(err)
+			}
+		}
+	}
+
+	c.IsStreamer = false
+	c.Viewers = nil
+
 }
