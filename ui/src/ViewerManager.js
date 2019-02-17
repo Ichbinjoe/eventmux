@@ -11,8 +11,8 @@ class ViewerManager extends Component {
     }
 
     componentDidMount() {
-        console.log(this.props)
-        this.props.negotiator().onNewChannelPush = function(uid, offer) {
+        const ref = this
+        ref.props.negotiator().onNewChannelPush = function(uid, offer) {
             const pc = new RTCPeerConnection({
                 iceServers: [{
                     urls: ["stun:stun.eventmux.com:3478"]
@@ -20,7 +20,7 @@ class ViewerManager extends Component {
             })
             pc.setRemoteDescription(JSON.parse(offer)).then(pc.createAnswer).then(answer => {
                 pc.setLocalDescription(answer).then(() => {
-                    this.props.negotiator().offerAnswer(uid, JSON.stringify(answer))
+                    ref.props.negotiator().offerAnswer(uid, JSON.stringify(answer))
                 }).catch(e => console.log(e))
             }).catch(e => console.log(e))
 
@@ -30,7 +30,7 @@ class ViewerManager extends Component {
                 switch (pc.connectionState) {
                     case "connected":
                         connectedInTime = true
-                        this.setState({
+                        ref.setState({
                             stream: pc 
                         })
                         break
@@ -38,7 +38,7 @@ class ViewerManager extends Component {
                     case "failed":
                         pc.close()
                     case "closed":
-                        this.startGrabNew()
+                        ref.startGrabNew()
                 }
             }
             
@@ -49,7 +49,6 @@ class ViewerManager extends Component {
             }, 3000)
         }
 
-        const ref = this
         setTimeout(() => {
             ref.startGrabNew()
         })

@@ -7,6 +7,7 @@ const UPDATE_VIEWER_COUNT_MSG = 5;
 const REQUEST_OFFER_MSG = 6;
 const SUPPLY_OFFER_MSG = 7;
 const SUPPLY_ANSWER_MSG = 8;
+const SUPPLY_ANSWER_RPL_MSG = 9;
 
 class NegotiationConnection {
     constructor() {
@@ -50,9 +51,9 @@ class NegotiationConnection {
                     if (ref.onRequestOffer !== undefined)
                         ref.onRequestOffer(msg.args[0])
                     break
-                case SUPPLY_ANSWER_MSG:
+                case SUPPLY_ANSWER_RPL_MSG:
                     if (ref.onSupplyAnswer !== undefined)
-                        ref.onSupplyAnswer(msg.args[0])
+                        ref.onSupplyAnswer(msg.args[0], msg.args[1])
                     break
             }
         };
@@ -66,8 +67,6 @@ class NegotiationConnection {
 
         if (arg == null) {
             arg = []
-        } else if (typeof arg !== Array) {
-            arg = [arg]
         }
 
         var msg = {command: command, args: arg};

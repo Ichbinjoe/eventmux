@@ -105,6 +105,7 @@ func (c *Client) readPump() {
 			log.Println("Requesting new viewer")
 			c.hub.registerViewer <- c
 		case startStreamingMsg:
+			log.Println("Start streaming")
 			c.hub.registerStreamer <- c
 		case responseNewOfferMsg:
 			// We are current in the STREAMER's pump
@@ -122,6 +123,8 @@ func (c *Client) readPump() {
 			pair := c.hub.SVPairs[msg.Args[0]]
 			pair.S.Send <- NewAnswerReqPassThruMsg(msg.Args[0], msg.Args[1])
 
+		default:
+			log.Println("DDFEAF")
 		}
 	}
 }
