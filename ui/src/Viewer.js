@@ -28,9 +28,11 @@ class Viewer extends Component {
     }
 
     render() {
-        const v = this.viewer.current
-        v.srcObject = this.props.stream
-        v.onLoadedMetadata = _ => v.play()
+        if (this.props.stream) {
+            const v = this.viewer.current
+            v.srcObject = this.props.stream
+            v.onLoadedMetadata = _ => v.play()
+        }
         return (
             <>
             <canvas ref={this.viewer} className='viewer-canvas'/>
