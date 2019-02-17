@@ -133,13 +133,14 @@ func (c *Client) writePump() {
 	for {
 		select {
 		case message, ok := <-c.Send:
-			log.Println("message type %d sent to client", message.Command)
 			c.conn.SetWriteDeadline(time.Now().Add(writeWait))
 			if !ok {
 				// The hub closed the channel.
 				c.conn.WriteMessage(websocket.CloseMessage, []byte{})
 				return
 			}
+
+			log.Println("message type %d sent to client", message.Command)
 
 			w, err := c.conn.NextWriter(websocket.TextMessage)
 			if err != nil {
