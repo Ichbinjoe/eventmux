@@ -47,7 +47,6 @@ class NegotiationConnection {
                         ref.onUpdateViewerCount(msg.args[0])
                     break
                 case REQUEST_OFFER_MSG:
-                    console.log(ref.onRequestOffer)
                     if (ref.onRequestOffer !== undefined)
                         ref.onRequestOffer(msg.args[0])
                     break
@@ -56,6 +55,9 @@ class NegotiationConnection {
                         ref.onSupplyAnswer(msg.args[0], msg.args[1])
                     break
                 case 12:
+                    if (ref.onICE !== undefined)
+                        ref.onICE(msg.args[0], msg.args[1])
+                    break
                 case 13:
                     if (ref.onICE !== undefined)
                         ref.onICE(msg.args[0], msg.args[1])
