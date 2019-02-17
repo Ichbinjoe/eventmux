@@ -23,6 +23,8 @@ class NegotiationConnection {
             this.conn.close()
         }
 
+        const ref = this
+
         this.conn = new WebSocket("ws://" + document.location.host + "/ws");
         this.conn.onclose = function (evt) {
             if (!this.running) return;
@@ -36,21 +38,21 @@ class NegotiationConnection {
 
             switch (msg.command) {
                 case NEW_VIEWING_CHANNEL_PUSH_MSG:
-                    if (this.onNewChannelPush !== undefined)
-                        this.onNewChannelPush(msg.args[0], msg.args[1])
+                    if (ref.onNewChannelPush !== undefined)
+                        ref.onNewChannelPush(msg.args[0], msg.args[1])
                     break
                 case UPDATE_VIEWER_COUNT_MSG:
-                    if (this.onUpdateViewerCount !== undefined)
-                        this.onUpdateViewerCount(msg.args[0])
+                    if (ref.onUpdateViewerCount !== undefined)
+                        ref.onUpdateViewerCount(msg.args[0])
                     break
                 case REQUEST_OFFER_MSG:
-                    console.log(this.onRequestOffer)
-                    if (this.onRequestOffer !== undefined)
-                        this.onRequestOffer(msg.args[0])
+                    console.log(ref.onRequestOffer)
+                    if (ref.onRequestOffer !== undefined)
+                        ref.onRequestOffer(msg.args[0])
                     break
                 case SUPPLY_ANSWER_MSG:
-                    if (this.onSupplyAnswer !== undefined)
-                        this.onSupplyAnswer(msg.args[0])
+                    if (ref.onSupplyAnswer !== undefined)
+                        ref.onSupplyAnswer(msg.args[0])
                     break
             }
         };
