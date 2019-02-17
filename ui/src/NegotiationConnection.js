@@ -36,6 +36,7 @@ class NegotiationConnection {
                         this.onUpdateViewerCount(msg.args[0])
                     break
                 case REQUEST_OFFER_MSG:
+                    console.log(this.onRequestOffer)
                     if (this.onRequestOffer !== undefined)
                         this.onRequestOffer(msg.args[0])
                     break

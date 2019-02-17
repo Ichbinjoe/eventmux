@@ -80,7 +80,7 @@ class Recorder extends Component {
 
                 function onErr(e) {
                     console.log(e)
-                    generateOffer()
+                    generateOffer(uid)
                 }
 
                 pc.createOffer(offer => {
