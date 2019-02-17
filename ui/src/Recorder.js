@@ -1,6 +1,8 @@
 import React, { Component } from 'react';
 import './Recorder.css'
 
+import adapter from 'webrtc-adapter';
+
 import NextSourceSVG from './switchinput.svg'
 
 import BasicButton from './BasicButton'

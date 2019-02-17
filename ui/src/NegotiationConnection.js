@@ -1,8 +1,13 @@
+import adapter from 'webrtc-adapter';
+
 class NegotiationConnection {
+
+    constructor(stun=null) {
+    }
 
     // Promise<Void>
     async onInit() {
-
+        
     }
 
     // Promise<RPCPeerConnection>
