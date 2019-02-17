@@ -46,6 +46,14 @@ class Recorder extends Component {
                 })
                 ref.peers.push(pc)
 
+                const so = ref.video.srcObject
+
+                so.getTracks().forEach(t => {
+                    pc.addTrack(t, so)
+
+                })
+
+
                 let connectedInTime = false
 
                 function deleteFromList() {

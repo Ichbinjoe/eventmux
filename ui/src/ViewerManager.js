@@ -36,7 +36,7 @@ class ViewerManager extends Component {
                 switch (pc.connectionState) {
                     case "connected":
                         connectedInTime = true
-                        ref.viewer.current.startPlayback(pc)
+                        //ref.viewer.current.startPlayback(pc)
                         break
                     case "disconnected":
                     case "failed":
@@ -44,6 +44,10 @@ class ViewerManager extends Component {
                     case "closed":
                         ref.startGrabNew()
                 }
+            }
+
+            pc.ontrack = function(e) {
+                ref.viewer.current.startPlayback(e.streams[0])
             }
                 /*            
             setTimeout(() => {
