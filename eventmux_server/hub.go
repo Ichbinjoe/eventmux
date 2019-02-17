@@ -107,6 +107,7 @@ func (h *Hub) initiateNewSVPair(s *Client, v *Client) {
 	id := uuid.New().String()
 	h.SVPairs[id] = svPair
 
+	log.Println("Initiating new S/V Pair with id %s", id)
 	s.Send <- NewReqOfferMsg(id)
 }
 

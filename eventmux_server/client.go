@@ -95,12 +95,15 @@ func (c *Client) readPump() {
 
 		switch msg.Command {
 		case nextViewingMsg:
+			log.Println("Requesting new viewer")
 			c.hub.registerViewer <- c
 		case startStreamingMsg:
 			c.hub.registerStreamer <- c
 		case responseNewOfferMsg:
 			// We are current in the STREAMER's pump
 			// expect id in args[0], offer in args[1]
+			log.Println("Got back offer for %s. \n Offer: %s", msg.Args[0],
+				msg.Args[1])
 			pair := c.hub.SVPairs[msg.Args[0]]
 			pair.S.Viewers[pair.V] = true
 			pair.V.Streamer = pair.S
@@ -123,6 +126,7 @@ func (c *Client) writePump() {
 	for {
 		select {
 		case message, ok := <-c.Send:
+			log.Println("message type %d sent to client", message.Command)
 			c.conn.SetWriteDeadline(time.Now().Add(writeWait))
 			if !ok {
 				// The hub closed the channel.
